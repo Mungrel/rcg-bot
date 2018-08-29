@@ -81,13 +81,7 @@ func getURL(response string) string {
 	return "http:" + trimmedURL
 }
 
-const pageID = "680457985653773"
 const postURL = "https://graph.facebook.com/v3.1/680457985653773/photos"
-
-type PostBody struct {
-	URL       string `json:"url"`
-	Published string `json:"published"`
-}
 
 func postToAPI(comicURL string) error {
 	client := http.DefaultClient

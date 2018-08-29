@@ -2,11 +2,9 @@ package main
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -30,38 +28,10 @@ func main() {
 	imgURL := getURL(string(respBytes))
 	fmt.Printf("Image URL: %s\n", imgURL)
 
-	err = saveImage(imgURL, "tmp.png")
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Image saved.")
-
 	err = postToAPI(imgURL)
 	if err != nil {
 		panic(err)
 	}
-}
-
-func saveImage(url, fileName string) error {
-	response, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-
-	defer response.Body.Close()
-
-	file, err := os.Create(fileName)
-	if err != nil {
-		return err
-	}
-
-	_, err = io.Copy(file, response.Body)
-	if err != nil {
-		return err
-	}
-
-	return file.Close()
 }
 
 func getURL(response string) string {

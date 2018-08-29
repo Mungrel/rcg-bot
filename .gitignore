@@ -19,11 +19,7 @@
 /Godeps/
 
 ### VisualStudioCode ###
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+.vscode/
 
 
 # End of https://www.gitignore.io/api/go,visualstudiocode

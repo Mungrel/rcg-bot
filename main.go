@@ -25,35 +25,45 @@ func main() {
 		panic(err)
 	}
 
-	imgURL := getURL(string(respBytes))
-	fmt.Printf("Image URL: %s\n", imgURL)
+	comicURL, permalink := getURL(string(respBytes))
+	fmt.Printf("Image URL: %s\nPermalink: %s\n", comicURL, permalink)
 
-	err = postToAPI(imgURL)
+	err = postToAPI(comicURL, permalink)
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("Success")
 }
 
-func getURL(response string) string {
+func getURL(response string) (string, string) {
 	lines := strings.Split(response, "\n")
-	var tag string
+	var comicURLTag string
+	var permalinkTag string
 	for _, line := range lines {
 		if strings.Contains(line, "<img src=\"//files.explosm.net/rcg/") {
-			tag = line
-			break
+			comicURLTag = line
+		} else if strings.Contains(line, "<input id=\"permalink\"") {
+			permalinkTag = line
 		}
 	}
 
-	src := strings.Split(tag, " ")[1]
+	src := strings.Split(comicURLTag, " ")[1]
 	url := strings.Split(src, "=")[1]
 
-	trimmedURL := strings.Trim(url, `"`)
-	return "http:" + trimmedURL
+	comicURL := "http:" + strings.Trim(url, `"`)
+
+	input := strings.Split(permalinkTag, " ")[3]
+	value := strings.Split(input, "=")[1]
+
+	permalink := strings.Trim(value, `"`)
+
+	return comicURL, permalink
 }
 
 const postURL = "https://graph.facebook.com/v3.1/680457985653773/photos"
 
-func postToAPI(comicURL string) error {
+func postToAPI(comicURL, permalink string) error {
 	client := http.DefaultClient
 
 	accessToken, err := getAccessToken()
@@ -64,6 +74,7 @@ func postToAPI(comicURL string) error {
 	params := url.Values{}
 	params.Add("url", comicURL)
 	params.Add("published", "true")
+	params.Add("caption", permalink)
 
 	url := postURL + "?" + params.Encode()
 

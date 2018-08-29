@@ -5,6 +5,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -35,6 +36,11 @@ func main() {
 	}
 
 	fmt.Println("Image saved.")
+
+	err = postToAPI(imgURL)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func saveImage(url, fileName string) error {
@@ -73,4 +79,60 @@ func getURL(response string) string {
 
 	trimmedURL := strings.Trim(url, `"`)
 	return "http:" + trimmedURL
+}
+
+const pageID = "680457985653773"
+const postURL = "https://graph.facebook.com/v3.1/680457985653773/photos"
+
+type PostBody struct {
+	URL       string `json:"url"`
+	Published string `json:"published"`
+}
+
+func postToAPI(comicURL string) error {
+	client := http.DefaultClient
+
+	accessToken, err := getAccessToken()
+	if err != nil {
+		return err
+	}
+
+	params := url.Values{}
+	params.Add("url", comicURL)
+	params.Add("published", "true")
+
+	url := postURL + "?" + params.Encode()
+
+	req, err := http.NewRequest("POST", url, nil)
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", accessToken))
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	respBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode > 299 {
+		return fmt.Errorf("\nbad response %d\nresponse: %s", resp.StatusCode, string(respBody))
+	}
+
+	return nil
+}
+
+func getAccessToken() (string, error) {
+	bytes, err := ioutil.ReadFile("./access_token")
+	if err != nil {
+		return "", err
+	}
+
+	token := string(bytes)
+	return strings.TrimSuffix(token, "\n"), nil
 }

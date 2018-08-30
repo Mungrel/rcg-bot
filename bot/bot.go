@@ -57,7 +57,7 @@ func (bot *Bot) Post() error {
 		}
 	}
 
-	fmt.Printf("Image URL: %s\nPermalink: %s\n", comic.ComicURL, comic.Permalink)
+	fmt.Printf("Image URL: %s\nPermalink: %s\nTime: %s\n", comic.ComicURL, comic.Permalink, time.Now().Format(time.RFC3339))
 
 	err := bot.postToAPI(comic)
 	if err != nil {

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"time"
 )
 
 // Bot is a convenience struct for calling bot-related methods
@@ -29,18 +30,53 @@ type Comic struct {
 	Permalink string
 }
 
-// ErrRCG500 represents a common 500 from the rcg API
-var ErrRCG500 = errors.New("non-200 status code")
+var errRCG500 = errors.New("non-200 status code")
+
+const maxRetries = 10
+
+// Post gets a comic and posts it to the page
+func (bot *Bot) Post() error {
+	var comic *Comic
+	comicErr := errRCG500
+	retries := 0
+
+	// Retry if we get that specific error
+	for comicErr == errRCG500 {
+		comic, comicErr = bot.getComic()
+		if comicErr != nil && comicErr != errRCG500 {
+			return comicErr
+		}
+
+		fmt.Println("failed, retrying...")
+
+		// Lets not ddos them
+		time.Sleep(500 * time.Millisecond)
+		retries++
+		if retries > maxRetries {
+			return errors.New("max retries exceeded")
+		}
+	}
+
+	fmt.Printf("Image URL: %s\nPermalink: %s\nTime: %s\n", comic.ComicURL, comic.Permalink, time.Now().Format(time.RFC3339))
+
+	err := bot.postToAPI(comic)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Success")
+	return nil
+}
 
 // GetComic gets a Comic's data from explosm.net/rcg
-func (bot *Bot) GetComic() (*Comic, error) {
+func (bot *Bot) getComic() (*Comic, error) {
 	resp, err := bot.client.Get("http://explosm.net/rcg")
 	if err != nil {
 		return nil, err
 	}
 
 	if resp.StatusCode == 500 {
-		return nil, ErrRCG500
+		return nil, errRCG500
 	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("non-200 status code: %d", resp.StatusCode)
 	}
@@ -89,8 +125,7 @@ func (bot *Bot) GetComic() (*Comic, error) {
 
 const postURL = "https://graph.facebook.com/v3.1/680457985653773/photos"
 
-// PostToAPI posts a comic to the FB Graph API
-func (bot *Bot) PostToAPI(comic *Comic) error {
+func (bot *Bot) postToAPI(comic *Comic) error {
 	client := http.DefaultClient
 
 	params := url.Values{}

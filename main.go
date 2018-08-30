@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -9,7 +8,8 @@ import (
 	"github.com/Mungrel/rcg-bot/bot"
 )
 
-const maxRetries = 10
+var postDelay = 30 * time.Minute
+var rcgBot *bot.Bot
 
 func main() {
 	accessToken, err := getAccessToken()
@@ -17,37 +17,17 @@ func main() {
 		panic(err)
 	}
 
-	b := bot.NewBot(accessToken)
+	rcgBot = bot.NewBot(accessToken)
 
-	var comic *bot.Comic
-	comicErr := bot.ErrRCG500
-	retries := 0
+	// infinite loop with a 30 minute sleep/delay
+	for {
 
-	// Retry if we get that specific error
-	for comicErr == bot.ErrRCG500 {
-		comic, comicErr = b.GetComic()
-		if err != nil && err != bot.ErrRCG500 {
+		err = rcgBot.Post()
+		if err != nil {
 			panic(err)
 		}
-
-		fmt.Println("failed, retrying...")
-
-		// Lets not ddos them
-		time.Sleep(500 * time.Millisecond)
-		retries++
-		if retries > maxRetries {
-			panic("max retries exceeded")
-		}
+		time.Sleep(postDelay)
 	}
-
-	fmt.Printf("Image URL: %s\nPermalink: %s\n", comic.ComicURL, comic.Permalink)
-
-	err = b.PostToAPI(comic)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Success")
 }
 
 func getAccessToken() (string, error) {

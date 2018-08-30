@@ -29,6 +29,9 @@ type Comic struct {
 	Permalink string
 }
 
+// ErrRCG500 represents a common 500 from the rcg API
+var ErrRCG500 = errors.New("non-200 status code")
+
 // GetComic gets a Comic's data from explosm.net/rcg
 func (bot *Bot) GetComic() (*Comic, error) {
 	resp, err := bot.client.Get("http://explosm.net/rcg")
@@ -36,7 +39,9 @@ func (bot *Bot) GetComic() (*Comic, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode != 200 {
+	if resp.StatusCode == 500 {
+		return nil, ErrRCG500
+	} else if resp.StatusCode != 200 {
 		return nil, fmt.Errorf("non-200 status code: %d", resp.StatusCode)
 	}
 

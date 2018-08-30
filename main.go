@@ -29,7 +29,10 @@ func main() {
 		if err != nil && err != bot.ErrRCG500 {
 			panic(err)
 		}
+
 		fmt.Println("failed, retrying...")
+
+		// Lets not ddos them
 		time.Sleep(500 * time.Millisecond)
 		retries++
 		if retries > maxRetries {

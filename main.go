@@ -19,9 +19,14 @@ func main() {
 
 	rcgBot = bot.NewBot(accessToken)
 
-	err = rcgBot.Post()
-	if err != nil {
-		panic(err)
+	// infinite loop with a 30 minute sleep/delay
+	for {
+
+		err = rcgBot.Post()
+		if err != nil {
+			panic(err)
+		}
+		time.Sleep(postDelay)
 	}
 }
 

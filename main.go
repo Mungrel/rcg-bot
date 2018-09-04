@@ -9,7 +9,6 @@ import (
 )
 
 var postDelay = 30 * time.Minute
-var rcgBot *bot.Bot
 
 func main() {
 	accessToken, err := getAccessToken()
@@ -17,15 +16,15 @@ func main() {
 		panic(err)
 	}
 
-	rcgBot = bot.NewBot(accessToken)
+	rcgBot := bot.NewBot(accessToken)
 
 	// infinite loop with a 30 minute sleep/delay
 	for {
-
 		err = rcgBot.Post()
 		if err != nil {
 			panic(err)
 		}
+
 		time.Sleep(postDelay)
 	}
 }

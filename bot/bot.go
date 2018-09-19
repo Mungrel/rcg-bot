@@ -70,7 +70,14 @@ func (bot *Bot) Post() error {
 
 // GetComic gets a Comic's data from explosm.net/rcg
 func (bot *Bot) getComic() (*Comic, error) {
-	resp, err := bot.client.Get("http://explosm.net/rcg")
+	req, err := http.NewRequest("GET", "http://explosm.net/rcg", nil)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("User-Agent", "cyanide_bot_69")
+
+	resp, err := bot.client.Do(req)
 	if err != nil {
 		return nil, err
 	}

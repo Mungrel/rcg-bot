@@ -4,4 +4,7 @@ go:
   - "1.11.x"
 
 script:
+  - go get -u github.com/alecthomas/gometalinter
+  - gometalinter --install
+  - gometalinter ./...
   - go build ./...

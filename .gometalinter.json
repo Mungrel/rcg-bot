@@ -1,0 +1,12 @@
+{
+    "Enable": [
+        "gofmt",
+        "ineffassign",
+        "megacheck",
+        "unconvert",
+        "varcheck",
+        "vet"
+    ],
+    "Deadline": "30s",
+    "Vendor": true
+}

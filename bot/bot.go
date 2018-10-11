@@ -34,37 +34,42 @@ var errRCG500 = errors.New("non-200 status code")
 
 const maxRetries = 10
 
-// Post gets a comic and posts it to the page
-func (bot *Bot) Post() error {
+// doPost gets a comic and posts it to the page
+func (bot *Bot) doPost() error {
 	var comic *Comic
-	comicErr := errRCG500
-	retries := 0
 
-	// Retry if we get that specific error
-	for comicErr == errRCG500 {
-		comic, comicErr = bot.getComic()
-		if comicErr != nil && comicErr != errRCG500 {
-			return comicErr
-		}
-
-		fmt.Println("failed, retrying...")
-
-		// Lets not ddos them
-		time.Sleep(500 * time.Millisecond)
-		retries++
-		if retries > maxRetries {
-			return errors.New("max retries exceeded")
-		}
+	comic, err := bot.getComic()
+	if err != nil {
+		return err
 	}
 
 	fmt.Printf("Image URL: %s\nPermalink: %s\nTime: %s\n", comic.ComicURL, comic.Permalink, time.Now().Format(time.RFC3339))
 
-	err := bot.postToAPI(comic)
+	err = bot.postToAPI(comic)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("Success")
+	return nil
+}
+
+func (bot *Bot) Post() error {
+	return repeat(0, bot.doPost)
+}
+
+func repeat(retries int, f func() error) error {
+	if retries > maxRetries {
+		return errors.New("max retries exceeded")
+	}
+	err := f()
+	if err != nil {
+		fmt.Printf("failed: %s\nretrying...\n", err.Error())
+		time.Sleep(500 * time.Millisecond)
+		retries++
+		repeat(retries, f)
+	}
+
 	return nil
 }
 

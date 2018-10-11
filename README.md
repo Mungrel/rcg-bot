@@ -1,1 +1,1 @@
-## CynaideBot69 ![build-status](https://travis-ci.org/Mungrel/rcg-bot.svg?branch=master)
+# CyanideBot69 [![Build Status](https://travis-ci.org/Mungrel/at-go.svg?branch=master)](https://travis-ci.org/Mungrel/at-go)

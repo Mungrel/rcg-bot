@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -10,6 +11,11 @@ import (
 
 var postDelay = 30 * time.Minute
 
+const (
+	modePost  = "post"
+	modeTop10 = "top10"
+)
+
 func main() {
 	accessToken, err := getAccessToken()
 	if err != nil {
@@ -17,6 +23,16 @@ func main() {
 	}
 
 	rcgBot := bot.NewBot(accessToken)
+
+	mode := flag.String("mode", modePost, "Mode to run bot in. (post)")
+	if mode != nil && *mode == modeTop10 {
+		err = rcgBot.Top10()
+		if err != nil {
+			panic(err)
+		}
+
+		return
+	}
 
 	// infinite loop with a 30 minute sleep/delay
 	for {

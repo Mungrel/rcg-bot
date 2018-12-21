@@ -3,7 +3,14 @@ package bot
 // Top10 determines the top 10 posts of all time by number of reactions for the year
 // and posts it as an album.
 func (bot *Bot) Top10() error {
-	return nil
+	allPosts, err := bot.getAllPosts()
+	if err != nil {
+		return err
+	}
+
+	top10Posts := getTop10Posts(allPosts)
+
+	return bot.postAsAlbum(top10Posts)
 }
 
 // Post represents a post from the FB API.

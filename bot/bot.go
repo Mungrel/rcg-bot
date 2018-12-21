@@ -135,26 +135,27 @@ func (bot *Bot) getComic() (*Comic, error) {
 	}, nil
 }
 
-const postURL = "https://graph.facebook.com/v3.1/680457985653773/photos"
+const (
+	baseURL = "https://graph.facebook.com/v3.1/680457985653773"
+	photos  = "/photos"
+)
 
-func (bot *Bot) postToAPI(comic *Comic) error {
-	client := http.DefaultClient
-
+func (bot *Bot) post(relativeURL string, queryParams map[string]string) error {
 	params := url.Values{}
-	params.Add("url", comic.ComicURL)
-	params.Add("caption", comic.Permalink)
-	params.Add("published", "true")
+	for key, value := range queryParams {
+		params.Add(key, value)
+	}
 
-	url := postURL + "?" + params.Encode()
+	encodedURL := baseURL + relativeURL + "?" + params.Encode()
 
-	req, err := http.NewRequest("POST", url, nil)
+	req, err := http.NewRequest("POST", encodedURL, nil)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bot.AccessToken))
 
-	resp, err := client.Do(req)
+	resp, err := bot.client.Do(req)
 	if err != nil {
 		return err
 	}
@@ -169,4 +170,14 @@ func (bot *Bot) postToAPI(comic *Comic) error {
 	}
 
 	return nil
+}
+
+func (bot *Bot) postToAPI(comic *Comic) error {
+	params := map[string]string{
+		"url":       comic.ComicURL,
+		"caption":   comic.Permalink,
+		"published": "true",
+	}
+
+	return bot.post(photos, params)
 }

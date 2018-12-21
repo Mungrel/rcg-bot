@@ -9,6 +9,7 @@ func (bot *Bot) Top10() error {
 // Post represents a post from the FB API.
 type Post struct{}
 
+// getAllPosts gets all posts from the FB API.
 func (bot *Bot) getAllPosts() ([]Post, error) {
 	return nil, nil
 }
@@ -18,7 +19,7 @@ func getTop10Posts(posts []Post) []Post {
 	return nil
 }
 
-// postAsAlbum posts the posts to the FB API as an album
+// postAsAlbum posts the posts to the FB API as an album.
 func (bot *Bot) postAsAlbum(posts []Post) error {
 	return nil
 }

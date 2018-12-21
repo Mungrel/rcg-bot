@@ -16,6 +16,8 @@ func (bot *Bot) Top10() error {
 // Post represents a post from the FB API.
 type Post struct{}
 
+const posts = "/posts"
+
 // getAllPosts gets all posts from the FB API.
 func (bot *Bot) getAllPosts() ([]Post, error) {
 	return nil, nil

@@ -1,6 +1,7 @@
 package fb
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -26,10 +27,17 @@ func NewClient(accessToken string) *Client {
 // Post makes an auth'd post request to the specified relative URL with the specified query params.
 func (fb *Client) Post(relativeURL string, params url.Values) error {
 	encodedURL := baseURL + relativeURL + "?" + params.Encode()
-	return fb.doRequest(http.MethodPost, encodedURL)
+	return fb.doRequest(http.MethodPost, encodedURL, nil)
 }
 
-func (fb *Client) doRequest(method, encodedURL string) error {
+// Get makes an auth'd get request to the specified relative URL and
+// marshals the result into the provided entities param.
+func (fb *Client) Get(relativeURL string, entities interface{}) error {
+	encodedURL := baseURL + relativeURL
+	return fb.doRequest(http.MethodGet, encodedURL, entities)
+}
+
+func (fb *Client) doRequest(method, encodedURL string, entities interface{}) error {
 	req, err := http.NewRequest("POST", encodedURL, nil)
 	if err != nil {
 		return err
@@ -49,6 +57,10 @@ func (fb *Client) doRequest(method, encodedURL string) error {
 
 	if resp.StatusCode > 299 {
 		return fmt.Errorf("\nbad response %d\nresponse: %s", resp.StatusCode, string(respBody))
+	}
+
+	if entities != nil {
+		return json.Unmarshal(respBody, entities)
 	}
 
 	return nil

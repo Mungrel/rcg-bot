@@ -8,19 +8,21 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/Mungrel/rcg-bot/fb"
 )
 
 // Bot is a convenience struct for calling bot-related methods
 type Bot struct {
-	AccessToken string
-	client      *http.Client
+	fbClient *fb.Client
+	client   *http.Client
 }
 
 // NewBot creates a new Bot object
 func NewBot(accessToken string) *Bot {
 	return &Bot{
-		AccessToken: accessToken,
-		client:      http.DefaultClient,
+		fbClient: fb.NewClient(accessToken),
+		client:   http.DefaultClient,
 	}
 }
 
@@ -45,7 +47,7 @@ func (bot *Bot) doPost() error {
 
 	fmt.Printf("Image URL: %s\nPermalink: %s\nTime: %s\n", comic.ComicURL, comic.Permalink, time.Now().Format(time.RFC3339))
 
-	err = bot.postToAPI(comic)
+	err = bot.postComic(comic)
 	if err != nil {
 		return err
 	}
@@ -135,38 +137,13 @@ func (bot *Bot) getComic() (*Comic, error) {
 	}, nil
 }
 
-const postURL = "https://graph.facebook.com/v3.1/680457985653773/photos"
+const photosURL = "/photos"
 
-func (bot *Bot) postToAPI(comic *Comic) error {
-	client := http.DefaultClient
-
+func (bot *Bot) postComic(comic *Comic) error {
 	params := url.Values{}
 	params.Add("url", comic.ComicURL)
 	params.Add("caption", comic.Permalink)
 	params.Add("published", "true")
 
-	url := postURL + "?" + params.Encode()
-
-	req, err := http.NewRequest("POST", url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", bot.AccessToken))
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	respBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode > 299 {
-		return fmt.Errorf("\nbad response %d\nresponse: %s", resp.StatusCode, string(respBody))
-	}
-
-	return nil
+	return bot.fbClient.Post(photosURL, params)
 }

@@ -95,7 +95,7 @@ func (bot *Bot) getAllPosts() ([]Post, error) {
 	return posts, nil
 }
 
-// getTop10Posts sorts the posts by reaction count and returns the top 10.
+// getTop10Posts sorts the posts by reaction count in descending order and returns the first 10.
 func getTop10Posts(posts []Post) []Post {
 	sort.Slice(posts, func(i, j int) bool {
 		return posts[i].TotalReactions > posts[j].TotalReactions

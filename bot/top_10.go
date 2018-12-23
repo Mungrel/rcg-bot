@@ -1,6 +1,9 @@
 package bot
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Top10 determines the top 10 posts of all time by number of reactions for the year
 // and posts it as an album.
@@ -25,7 +28,8 @@ type Post struct {
 
 // postResponse represents a response from the FB API for post reaction summaries
 type postResponse struct {
-	Data []fbPost `json:"data"`
+	Data   []fbPost `json:"data"`
+	Paging paging   `json:"paging"`
 }
 
 type fbPost struct {
@@ -37,6 +41,10 @@ type fbPost struct {
 			TotalCount int `json:"total_count"`
 		} `json:"summary"`
 	} `json:"reactions"`
+}
+
+type paging struct {
+	Next *string `json:"next"`
 }
 
 func (p *fbPost) toPost() Post {
@@ -53,13 +61,32 @@ const postsURL = "/posts"
 
 // getAllPosts gets all posts from the FB API.
 func (bot *Bot) getAllPosts() ([]Post, error) {
+	fbPosts := []fbPost{}
+
 	var response postResponse
 	err := bot.fbClient.Get(postsURL, &response)
 	if err != nil {
 		return nil, err
 	}
 
-	posts := make([]Post, 0, len(response.Data))
+	fbPosts = append(fbPosts, response.Data...)
+
+	for response.Paging.Next != nil {
+		fmt.Println("Fetching next page")
+		// Need to declare a fresh struct here so that Next will be nil if not in response
+		var tmpResponse postResponse
+		err := bot.fbClient.GetAbsoluteURL(*response.Paging.Next, &tmpResponse)
+		if err != nil {
+			return nil, err
+		}
+
+		response = tmpResponse
+
+		fbPosts = append(fbPosts, response.Data...)
+	}
+
+	fmt.Printf("\nNumber of posts: %d\n\n", len(fbPosts))
+	posts := make([]Post, 0, len(fbPosts))
 	for _, fbPost := range response.Data {
 		posts = append(posts, fbPost.toPost())
 	}

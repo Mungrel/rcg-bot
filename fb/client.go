@@ -30,10 +30,16 @@ func (fb *Client) Post(relativeURL string, params url.Values) error {
 	return fb.doRequest(http.MethodPost, encodedURL, nil)
 }
 
+// GetAbsoluteURL makes an auth'd get request to the specified absolute URL and
+// marshals the result into the provided entities param.
+func (fb *Client) GetAbsoluteURL(absoluteURL string, entities interface{}) error {
+	return fb.doRequest(http.MethodGet, absoluteURL, entities)
+}
+
 // Get makes an auth'd get request to the specified relative URL and
 // marshals the result into the provided entities param.
 func (fb *Client) Get(relativeURL string, entities interface{}) error {
-	encodedURL := baseURL + relativeURL + "?date_format=U&fields=id,created_time,message,reactions.limit(0).summary(1)&limit=10"
+	encodedURL := baseURL + relativeURL + "?date_format=U&fields=id,created_time,message,reactions.limit(0).summary(1)&limit=100"
 	return fb.doRequest(http.MethodGet, encodedURL, entities)
 }
 

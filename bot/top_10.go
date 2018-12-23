@@ -2,6 +2,7 @@ package bot
 
 import (
 	"fmt"
+	"sort"
 	"time"
 )
 
@@ -87,7 +88,7 @@ func (bot *Bot) getAllPosts() ([]Post, error) {
 
 	fmt.Printf("\nNumber of posts: %d\n\n", len(fbPosts))
 	posts := make([]Post, 0, len(fbPosts))
-	for _, fbPost := range response.Data {
+	for _, fbPost := range fbPosts {
 		posts = append(posts, fbPost.toPost())
 	}
 
@@ -96,7 +97,11 @@ func (bot *Bot) getAllPosts() ([]Post, error) {
 
 // getTop10Posts sorts the posts by reaction count and returns the top 10.
 func getTop10Posts(posts []Post) []Post {
-	return nil
+	sort.Slice(posts, func(i, j int) bool {
+		return posts[i].TotalReactions > posts[j].TotalReactions
+	})
+
+	return posts[:10]
 }
 
 // postAsAlbum posts the posts to the FB API as an album.

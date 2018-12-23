@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"strings"
 	"time"
@@ -25,7 +26,10 @@ func main() {
 	rcgBot := bot.NewBot(accessToken)
 
 	mode := flag.String("mode", modePost, "Mode to run bot in. (post)")
+	flag.Parse()
+
 	if mode != nil && *mode == modeTop10 {
+		fmt.Println("Running in Top10 mode")
 		err = rcgBot.Top10()
 		if err != nil {
 			panic(err)

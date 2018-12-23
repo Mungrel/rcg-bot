@@ -33,12 +33,12 @@ func (fb *Client) Post(relativeURL string, params url.Values) error {
 // Get makes an auth'd get request to the specified relative URL and
 // marshals the result into the provided entities param.
 func (fb *Client) Get(relativeURL string, entities interface{}) error {
-	encodedURL := baseURL + relativeURL
+	encodedURL := baseURL + relativeURL + "?date_format=U&fields=id,created_time,message,reactions.limit(0).summary(1)&limit=10"
 	return fb.doRequest(http.MethodGet, encodedURL, entities)
 }
 
 func (fb *Client) doRequest(method, encodedURL string, entities interface{}) error {
-	req, err := http.NewRequest("POST", encodedURL, nil)
+	req, err := http.NewRequest(method, encodedURL, nil)
 	if err != nil {
 		return err
 	}

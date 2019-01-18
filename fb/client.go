@@ -38,8 +38,8 @@ func (fb *Client) GetAbsoluteURL(absoluteURL string, entities interface{}) error
 
 // Get makes an auth'd get request to the specified relative URL and
 // marshals the result into the provided entities param.
-func (fb *Client) Get(relativeURL string, entities interface{}) error {
-	encodedURL := baseURL + relativeURL + "?date_format=U&fields=id,created_time,message,reactions.limit(0).summary(1)&limit=100"
+func (fb *Client) Get(relativeURL string, params url.Values, entities interface{}) error {
+	encodedURL := baseURL + relativeURL + "?" + params.Encode()
 	return fb.doRequest(http.MethodGet, encodedURL, entities)
 }
 

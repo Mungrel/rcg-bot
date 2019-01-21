@@ -2,7 +2,7 @@
     "Enable": [
         "gofmt",
         "ineffassign",
-        "megacheck",
+        "staticcheck",
         "unconvert",
         "varcheck",
         "vet"

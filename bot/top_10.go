@@ -139,5 +139,4 @@ func (bot *Bot) postTop10Posts(posts []Post) error {
 	params.Add("message", message)
 
 	return bot.fbClient.Post(feedURL, params)
-	return nil
 }

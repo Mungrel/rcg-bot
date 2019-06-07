@@ -77,7 +77,7 @@ func repeat(retries int, f func() error) error {
 
 // GetComic gets a Comic's data from explosm.net/rcg
 func (bot *Bot) getComic() (*Comic, error) {
-	req, err := http.NewRequest("GET", "http://explosm.net/rcg?promo=false", nil)
+	req, err := http.NewRequest("GET", "http://explosm.net/rcg", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -105,8 +105,11 @@ func (bot *Bot) getComic() (*Comic, error) {
 	lines := strings.Split(response, "\n")
 	var comicURLTag string
 	var permalinkTag string
+
+	const comicURLTagPrefix = `<a href="https://rcg-cdn.explosm.net/comics`
+	const comicURLTagSuffix = `.png" class="custom-social-button" title="Download Image" download target="_blank">`
 	for _, line := range lines {
-		if strings.Contains(line, "<img src=\"//files.explosm.net/rcg/") {
+		if strings.HasPrefix(line, comicURLTagPrefix) && strings.HasSuffix(line, comicURLTagSuffix) {
 			comicURLTag = line
 		} else if strings.Contains(line, "<input id=\"permalink\"") {
 			permalinkTag = line
@@ -116,7 +119,7 @@ func (bot *Bot) getComic() (*Comic, error) {
 	src := strings.Split(comicURLTag, " ")[1]
 	url := strings.Split(src, "=")[1]
 
-	comicURL := "http:" + strings.Trim(url, `"`)
+	comicURL := strings.Trim(url, `"`)
 
 	input := strings.Split(permalinkTag, " ")[3]
 	value := strings.Split(input, "=")[1]

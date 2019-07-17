@@ -77,7 +77,7 @@ func repeat(retries int, f func() error) error {
 
 // GetComic gets a Comic's data from explosm.net/rcg
 func (bot *Bot) getComic() (*Comic, error) {
-	req, err := http.NewRequest("GET", "http://explosm.net/rcg", nil)
+	req, err := http.NewRequest("GET", "http://explosm.net/rcg?promo=false", nil)
 	if err != nil {
 		return nil, err
 	}

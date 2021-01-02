@@ -67,7 +67,7 @@ func repeat(retries int, f func() error) error {
 	err := f()
 	if err != nil {
 		fmt.Printf("failed: %s\nretrying...\n", err.Error())
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1 * time.Minute)
 		retries++
 		repeat(retries, f)
 	}
@@ -77,7 +77,7 @@ func repeat(retries int, f func() error) error {
 
 // GetComic gets a Comic's data from explosm.net/rcg
 func (bot *Bot) getComic() (*Comic, error) {
-	req, err := http.NewRequest("GET", "http://explosm.net/rcg?promo=false", nil)
+	req, err := http.NewRequest(http.MethodGet, "http://explosm.net/rcg?promo=false", nil)
 	if err != nil {
 		return nil, err
 	}
@@ -89,9 +89,9 @@ func (bot *Bot) getComic() (*Comic, error) {
 		return nil, err
 	}
 
-	if resp.StatusCode == 500 {
+	if resp.StatusCode == http.StatusInternalServerError {
 		return nil, errRCG500
-	} else if resp.StatusCode != 200 {
+	} else if resp.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("non-200 status code: %d", resp.StatusCode)
 	}
 
